@@ -1,7 +1,8 @@
 use core::convert::TryInto;
 use core::mem;
 use usb_device::class_prelude::*;
-use usb_device::descriptor::lang_id::LangID;
+// usb-device 0.3 has LangID; downgraded 0.2.9 does not.
+// use usb_device::descriptor::lang_id::LangID;
 use usb_device::device::DEFAULT_ALTERNATE_SETTING;
 use usb_device::Result;
 
@@ -153,7 +154,8 @@ impl<B: UsbBus> UsbClass<B> for CdcAcmClass<'_, B> {
             USB_CLASS_CDC,
             CDC_SUBCLASS_ACM,
             CDC_PROTOCOL_NONE,
-            None,
+            // In usb-device 0.3, we would return None in addition, but in downgroaded 0.2.9 we don't.
+            // None,
         )?;
 
         writer.interface_alt(
@@ -217,7 +219,7 @@ impl<B: UsbBus> UsbClass<B> for CdcAcmClass<'_, B> {
         Ok(())
     }
 
-    fn get_string(&self, index: StringIndex, _lang_id: LangID) -> Option<&str> {
+    fn get_string(&self, index: StringIndex, _lang_id: u16) -> Option<&str> {
         match (self.comm_if_name, self.data_if_name) {
             (Some((i, s)), _) if i == index => Some(s),
             (_, Some((i, s))) if i == index => Some(s),

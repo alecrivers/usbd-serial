@@ -3,7 +3,8 @@ use crate::cdc_acm::*;
 use core::borrow::BorrowMut;
 use core::slice;
 use usb_device::class_prelude::*;
-use usb_device::descriptor::lang_id::LangID;
+// usb-device 0.3 has LangID; downgraded 0.2.9 does not.
+// use usb_device::descriptor::lang_id::LangID;
 use usb_device::Result;
 
 /// USB (CDC-ACM) serial port with built-in buffering to implement stream-like behavior.
@@ -244,7 +245,7 @@ where
         self.inner.get_configuration_descriptors(writer)
     }
 
-    fn get_string(&self, index: StringIndex, lang_id: LangID) -> Option<&str> {
+    fn get_string(&self, index: StringIndex, lang_id: u16) -> Option<&str> {
         self.inner.get_string(index, lang_id)
     }
 
