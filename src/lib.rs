@@ -50,7 +50,7 @@
 
 mod buffer;
 mod cdc_acm;
-mod io;
+pub mod io; // io has been made pub just to get the Error type out.
 mod serial_port;
 
 pub use crate::buffer::DefaultBufferStore;
