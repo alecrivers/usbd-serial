@@ -11,7 +11,7 @@ use usb_device::Result;
 ///
 /// The RS and WS type arguments specify the storage for the read/write buffers, respectively. By
 /// default an internal 128 byte buffer is used for both directions.
-pub struct SerialPort<'a, B, S: CustomControlRequestHandler = NoopSpecialRequestHandler, RS = DefaultBufferStore, WS = DefaultBufferStore>
+pub struct SerialPort<'a, B, S: CustomControlRequestHandler<B> = NoopSpecialRequestHandler, RS = DefaultBufferStore, WS = DefaultBufferStore>
 where
     B: UsbBus,
     RS: BorrowMut<[u8]>,
@@ -44,7 +44,7 @@ enum WriteState {
 
 use crate::cdc_acm::{CustomControlRequestHandler, NoopSpecialRequestHandler};
 
-impl<'a, B, S: CustomControlRequestHandler> SerialPort<'a, B, S>
+impl<'a, B, S: CustomControlRequestHandler<B>> SerialPort<'a, B, S>
 where
     B: UsbBus,
 {
@@ -73,7 +73,7 @@ where
     }
 }
 
-impl<'a, B, RS, WS, S: CustomControlRequestHandler> SerialPort<'a, B, S, RS, WS>
+impl<'a, B, RS, WS, S: CustomControlRequestHandler<B>> SerialPort<'a, B, S, RS, WS>
 where
     B: UsbBus,
     RS: BorrowMut<[u8]>,
@@ -242,7 +242,7 @@ where
     }
 }
 
-impl<B, S: CustomControlRequestHandler, RS, WS> UsbClass<B> for SerialPort<'_, B, S, RS, WS>
+impl<B, S: CustomControlRequestHandler<B>, RS, WS> UsbClass<B> for SerialPort<'_, B, S, RS, WS>
 where
     B: UsbBus,
     RS: BorrowMut<[u8]>,
@@ -278,7 +278,7 @@ where
     }
 }
 
-impl<B, S: CustomControlRequestHandler, RS, WS> embedded_hal::serial::Write<u8> for SerialPort<'_, B, S, RS, WS>
+impl<B, S: CustomControlRequestHandler<B>, RS, WS> embedded_hal::serial::Write<u8> for SerialPort<'_, B, S, RS, WS>
 where
     B: UsbBus,
     RS: BorrowMut<[u8]>,
@@ -303,7 +303,7 @@ where
     }
 }
 
-impl<B, S: CustomControlRequestHandler, RS, WS> embedded_hal::serial::Read<u8> for SerialPort<'_, B, S, RS, WS>
+impl<B, S: CustomControlRequestHandler<B>, RS, WS> embedded_hal::serial::Read<u8> for SerialPort<'_, B, S, RS, WS>
 where
     B: UsbBus,
     RS: BorrowMut<[u8]>,

@@ -26,15 +26,15 @@ const REQ_SET_LINE_CODING: u8 = 0x20;
 const REQ_GET_LINE_CODING: u8 = 0x21;
 const REQ_SET_CONTROL_LINE_STATE: u8 = 0x22;
 
-pub trait CustomControlRequestHandler {
+pub trait CustomControlRequestHandler<B: usb_device::bus::UsbBus> {
     // Returns whether the request was handled.
-    fn handle_request(&mut self, req: &control::Request) -> bool;
+    fn handle_request(&mut self, req: &ControlOut<B>) -> bool;
 }
 
 pub struct NoopSpecialRequestHandler {
 }
-impl CustomControlRequestHandler for NoopSpecialRequestHandler {
-    fn handle_request(&mut self, _req: &control::Request) -> bool {
+impl<B: usb_device::bus::UsbBus> CustomControlRequestHandler<B> for NoopSpecialRequestHandler {
+    fn handle_request(&mut self, _xfer: &ControlOut<B>) -> bool {
         return false;
     }
 }
@@ -53,7 +53,7 @@ impl CustomControlRequestHandler for NoopSpecialRequestHandler {
 ///   host operating system until a subsequent shorter packet is sent. A zero-length packet (ZLP)
 ///   can be sent if there is no other data to send. This is because USB bulk transactions must be
 ///   terminated with a short packet, even if the bulk endpoint is used for stream-like data.
-pub struct CdcAcmClass<'a, B: UsbBus, S: CustomControlRequestHandler> {
+pub struct CdcAcmClass<'a, B: UsbBus, S: CustomControlRequestHandler<B>> {
     comm_if: InterfaceNumber,
     comm_if_name: Option<(StringIndex, &'static str)>,
     comm_ep: EndpointIn<'a, B>,
@@ -67,7 +67,7 @@ pub struct CdcAcmClass<'a, B: UsbBus, S: CustomControlRequestHandler> {
     special_request_handler: S,
 }
 
-impl<'a, B: UsbBus, S: CustomControlRequestHandler> CdcAcmClass<'a, B, S> {
+impl<'a, B: UsbBus, S: CustomControlRequestHandler<B>> CdcAcmClass<'a, B, S> {
     /// Creates a new CdcAcmClass with the provided UsbBus and max_packet_size in bytes. For
     /// full-speed devices, max_packet_size has to be one of 8, 16, 32 or 64.
     pub fn new<'alloc: 'a>(
@@ -163,7 +163,7 @@ impl<'a, B: UsbBus, S: CustomControlRequestHandler> CdcAcmClass<'a, B, S> {
     }
 }
 
-impl<B: UsbBus, S: CustomControlRequestHandler> UsbClass<B> for CdcAcmClass<'_, B, S> {
+impl<B: UsbBus, S: CustomControlRequestHandler<B>> UsbClass<B> for CdcAcmClass<'_, B, S> {
     fn get_configuration_descriptors(&self, writer: &mut DescriptorWriter) -> Result<()> {
         writer.iad(
             self.comm_if,
@@ -311,7 +311,7 @@ impl<B: UsbBus, S: CustomControlRequestHandler> UsbClass<B> for CdcAcmClass<'_, 
                 xfer.accept().ok();
             }
             _ => {
-                if self.special_request_handler.handle_request(&req) {
+                if self.special_request_handler.handle_request(&xfer) {
                     xfer.accept().ok();
                 } else {
                     xfer.reject().ok();

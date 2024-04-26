@@ -25,13 +25,13 @@ impl embedded_io::Error for Error {
     }
 }
 
-impl<Bus: UsbBus, S: CustomControlRequestHandler, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::ErrorType
+impl<Bus: UsbBus, S: CustomControlRequestHandler<Bus>, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::ErrorType
     for SerialPort<'_, Bus, S, RS, WS>
 {
     type Error = Error;
 }
 
-impl<Bus: UsbBus, S: CustomControlRequestHandler, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::Read
+impl<Bus: UsbBus, S: CustomControlRequestHandler<Bus>, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::Read
     for SerialPort<'_, Bus, S, RS, WS>
 {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
@@ -47,7 +47,7 @@ impl<Bus: UsbBus, S: CustomControlRequestHandler, RS: BorrowMut<[u8]>, WS: Borro
     }
 }
 
-impl<Bus: UsbBus, S: CustomControlRequestHandler, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::ReadReady
+impl<Bus: UsbBus, S: CustomControlRequestHandler<Bus>, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::ReadReady
     for SerialPort<'_, Bus, S, RS, WS>
 {
     fn read_ready(&mut self) -> Result<bool, Self::Error> {
@@ -56,7 +56,7 @@ impl<Bus: UsbBus, S: CustomControlRequestHandler, RS: BorrowMut<[u8]>, WS: Borro
     }
 }
 
-impl<Bus: UsbBus, S: CustomControlRequestHandler, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::Write
+impl<Bus: UsbBus, S: CustomControlRequestHandler<Bus>, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::Write
     for SerialPort<'_, Bus, S, RS, WS>
 {
     fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
@@ -80,7 +80,7 @@ impl<Bus: UsbBus, S: CustomControlRequestHandler, RS: BorrowMut<[u8]>, WS: Borro
     }
 }
 
-impl<Bus: UsbBus, S: CustomControlRequestHandler, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::WriteReady
+impl<Bus: UsbBus, S: CustomControlRequestHandler<Bus>, RS: BorrowMut<[u8]>, WS: BorrowMut<[u8]>> embedded_io::WriteReady
     for SerialPort<'_, Bus, S, RS, WS>
 {
     fn write_ready(&mut self) -> Result<bool, Self::Error> {
